@@ -1,7 +1,7 @@
 import imutils.video as video
 import time
 import imutils
-import pyzbar
+from pyzbar import pyzbar
 import requests
 import cv2
 
@@ -16,7 +16,7 @@ while True:
     frame = imutils.resize(frame, width=400)  # Resize to improve performance.
 
     # Find and decode the barcodes in the frame.
-    barcodes = pyzbar.pyzbar.decode(frame)
+    barcodes = pyzbar.decode(frame)
 
     for barcode in barcodes:
         # Extract the bounding box location of the barcode and draw it.
@@ -33,7 +33,7 @@ while True:
             product_name = data["product"]["product_name"]
 
             # Draw the barcode data and barcode type on the image.
-            cv2.putText(frame, product_name, (x, y, - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(frame, product_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
             # Add the barcode to the "cache".
             found[barcode_data] = product_name
