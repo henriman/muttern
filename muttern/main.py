@@ -10,7 +10,6 @@ import database
 video_stream = video.VideoStream(usePiCamera=True).start()
 time.sleep(2)  # Allow the camera sensor to warm up.
 
-found = dict()
 database_handler = database.OFFDatabaseHandler(local_location=None)
 
 while True:

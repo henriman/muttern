@@ -4,13 +4,7 @@ import abc
 from typing import Optional, Dict
 import pathlib
 import pickle
-import requests  # go on
-
-# __slots__
-# https://stackoverflow.com/questions/472000/usage-of-slots
-# https://stackoverflow.com/questions/472000/usage-of-slots
-
-# other name than __get?
+import requests
 
 class DatabaseHandler(abc.ABC):
     """A default interface for handling access to an EAN database.
@@ -21,6 +15,8 @@ class DatabaseHandler(abc.ABC):
     The database handler is supposed to be accessed in a context manager
     with the `with` statement, to ensure that the cache is saved.
     """
+
+    __slots__ = ()
 
     def __init__(self, local_location: Optional[str] = None) -> None:
         """Initialize the database handler."""
@@ -74,6 +70,8 @@ class DatabaseHandler(abc.ABC):
 
 class OFFDatabaseHandler(DatabaseHandler):
     """A class for handling access to the Open Food Facts database."""
+
+    __slots__ = ("products", "path")
 
     @staticmethod
     def url(barcode: str) -> str:
