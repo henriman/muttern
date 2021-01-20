@@ -4,12 +4,15 @@ import imutils
 from pyzbar import pyzbar
 import requests
 import cv2
+import database
 
 # Initialize the video stream.
 video_stream = video.VideoStream(usePiCamera=True).start()
 time.sleep(2)  # Allow the camera sensor to warm up.
 
 found = dict()
+database_handler = database.OFFDatabaseHandler(local_location=None)
+
 while True:
     # Grab the current frame from the video stream.
     frame = video_stream.read()
@@ -25,21 +28,10 @@ while True:
         # Convert the barocde data into a string.
         barcode_data = barcode.data.decode("utf-8")
 
-        if barcode_data not in found:
-            # Retrieve product information.
-            url = f"https://world.openfoodfacts.org/api/v0/product/{barcode_data}.json"
-            response = requests.get(url=url)
-            data = response.json()
-            product_name = data["product"]["product_name"]
-
+        with database_handler as dbh:
+            product_name = dbh.get(barcode_data)
             # Draw the barcode data and barcode type on the image.
             cv2.putText(frame, product_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-
-            # Add the barcode to the "cache".
-            found[barcode_data] = product_name
-
-        else:
-            cv2.putText(frame, found[barcode_data], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     # Show the output frame.
     cv2.imshow("Barcode scanner", frame)

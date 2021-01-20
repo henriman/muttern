@@ -34,7 +34,7 @@ class DatabaseHandler(abc.ABC):
             self.path = pathlib.Path(local_location)
 
     @abc.abstractmethod
-    def __get(self, barcode: str) -> str:
+    def _get(self, barcode: str) -> str:
         """Request the product associated with the given `barcode` from the database."""
 
         pass
@@ -47,7 +47,7 @@ class DatabaseHandler(abc.ABC):
 
         # If the barcode is not in the cache, request the product from the database.
         if barcode not in self.products.keys():
-            result = self.__get(barcode)
+            result = self._get(barcode)
             self.products[barcode] = result
 
         # Return the product associated with the barcode.
@@ -81,7 +81,7 @@ class OFFDatabaseHandler(DatabaseHandler):
 
         return f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
 
-    def __get(self, barcode: str) -> str:
+    def _get(self, barcode: str) -> str:
         """Request the product associated with the given `barcode` from the database."""
 
         # Request the data associated with the given `barcode`
@@ -91,3 +91,4 @@ class OFFDatabaseHandler(DatabaseHandler):
         product = data["product"]["product_name"]
 
         return product
+
