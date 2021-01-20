@@ -1,15 +1,19 @@
 """This file includes everything to handle accessing the database."""
 
+import abc
 from typing import Optional, Dict
 import pathlib
 import pickle
+import requests  # go on
 
-# https://docs.python.org/3/reference/datamodel.html
-# https://docs.python.org/3/library/pickle.html
-# https://docs.python.org/3/library/typing.html
+# __slots__
+# https://stackoverflow.com/questions/472000/usage-of-slots
+# https://stackoverflow.com/questions/472000/usage-of-slots
 
-class DatabaseHandler:
-    """An default interface for handling access to an EAN database.
+# other name than __get?
+
+class DatabaseHandler(abc.ABC):
+    """A default interface for handling access to an EAN database.
 
     To improve performance, results will be cached and saved to a file locally,
     as it is likely that the same products will be accessed repeatedly.
@@ -21,26 +25,69 @@ class DatabaseHandler:
     def __init__(self, local_location: Optional[str] = None) -> None:
         """Initialize the database handler."""
 
+        # Initalize an empty cache.
+        self.products: Dict[str, str] = dict()
+
         # If a location for the local database was provided, create a Path object from it.
         self.path: Optional[pathlib.Path] = None
         if local_location is not None:
             self.path = pathlib.Path(local_location)
+
+    @abc.abstractmethod
+    def __get(self, barcode: str) -> str:
+        """Request the product associated with the given `barcode` from the database."""
+
+        pass
+
+    def get(self, barcode: str) -> str:
+        """Return the product associated with the given `barcode`.
+
+        Store the result in the cache for re-use.
+        """
+
+        # If the barcode is not in the cache, request the product from the database.
+        if barcode not in self.products.keys():
+            result = self.__get(barcode)
+            self.products[barcode] = result
+
+        # Return the product associated with the barcode.
+        return self.products[barcode]
 
     def __enter__(self) -> "DatabaseHandler":
         """Initialize the cache and enter into the context manager."""
 
         # If a location for the local database was provided and it already exists,
         # deserialize the cache from it.
-        self.cache: Dict[str, str] = dict()
         if self.path is not None and self.path.is_file():
             with self.path.open(mode="rb") as local_database:
-                self.cache = pickle.load(local_database)
+                self.products = pickle.load(local_database)
 
         # Return the `DatabaseHandler` itself to be used in the context manager.
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Serialize and save the cache to a file and exit the context manager."""
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """If a path was given, save the cache to a file; exit the context manager."""
 
-        with self.path.open(mode="wb") as local_database:
-            pickle.dump(self.cache, local_database)
+        if self.path is not None:
+            with self.path.open(mode="wb") as local_database:
+                pickle.dump(self.products, local_database)
+
+class OFFDatabaseHandler(DatabaseHandler):
+    """A class for handling access to the Open Food Facts database."""
+
+    @staticmethod
+    def url(barcode: str) -> str:
+        """Create the request URL from the given `barcode`."""
+
+        return f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
+
+    def __get(self, barcode: str) -> str:
+        """Request the product associated with the given `barcode` from the database."""
+
+        # Request the data associated with the given `barcode`
+        # and extract the necessary information.
+        response = requests.get(url=self.url(barcode))
+        data = response.json()
+        product = data["product"]["product_name"]
+
+        return product
