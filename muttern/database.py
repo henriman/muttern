@@ -17,13 +17,13 @@ class DatabaseHandler(abc.ABC):
     with the `with` statement, to ensure that the cache is saved.
     """
 
-    __slots__ = ()
+    __slots__ = tuple()
 
     def __init__(self, local_location: Optional[str] = None) -> None:
         """Initialize the database handler."""
 
         # Initalize an empty cache.
-        self.products: Dict[str, product.OFFProduct] = dict()
+        self.products: Dict[str, product.Product] = dict()
 
         # If a location for the local database was provided, create a Path object from it.
         self.path: Optional[pathlib.Path] = None
@@ -31,12 +31,12 @@ class DatabaseHandler(abc.ABC):
             self.path = pathlib.Path(local_location)
 
     @abc.abstractmethod
-    def _get(self, barcode: str) -> product.OFFProduct:
+    def _get(self, barcode: str) -> product.Product:
         """Request the product associated with the given `barcode` from the database."""
 
         pass
 
-    def get(self, barcode: str) -> product.OFFProduct:
+    def get(self, barcode: str) -> product.Product:
         """Return the product associated with the given `barcode`.
 
         Store the result in the cache for re-use.
