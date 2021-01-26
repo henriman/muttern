@@ -87,7 +87,5 @@ class OFFDatabaseHandler(DatabaseHandler):
         # and extract the necessary information.
         response = requests.get(url=self.url(barcode))
         data = response.json()
-        product = product.OFFProduct(data["product"])
 
-        return product
-
+        return product.OFFProduct(data["product"])
