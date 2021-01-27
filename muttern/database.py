@@ -1,7 +1,7 @@
 """This file includes everything to handle accessing the database."""
 
 import abc
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import pathlib
 import pickle
 import requests
@@ -17,13 +17,13 @@ class DatabaseHandler(abc.ABC):
     with the `with` statement, to ensure that the cache is saved.
     """
 
-    __slots__ = tuple()
+    __slots__: Tuple[str, ...] = tuple()
 
     def __init__(self, local_location: Optional[str] = None) -> None:
         """Initialize the database handler."""
 
         # Initalize an empty cache.
-        self.products: Dict[str, product.Product] = dict()
+        self.products: Dict[str, Optional[product.Product]] = dict()
 
         # If a location for the local database was provided, create a Path object from it.
         self.path: Optional[pathlib.Path] = None
@@ -31,12 +31,12 @@ class DatabaseHandler(abc.ABC):
             self.path = pathlib.Path(local_location)
 
     @abc.abstractmethod
-    def _get(self, barcode: str) -> product.Product:
+    def _get(self, barcode: str) -> Optional[product.Product]:
         """Request the product associated with the given `barcode` from the database."""
 
         pass
 
-    def get(self, barcode: str) -> product.Product:
+    def get(self, barcode: str) -> Optional[product.Product]:
         """Return the product associated with the given `barcode`.
 
         Store the result in the cache for re-use.
@@ -80,15 +80,11 @@ class OFFDatabaseHandler(DatabaseHandler):
 
         return f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
 
-    def _get(self, barcode: str) -> product.OFFProduct:
+    def _get(self, barcode: str) -> Optional[product.OFFProduct]:
         """Request the product associated with the given `barcode` from the database."""
 
-        # Request the data associated with the given `barcode`
-        # and extract the necessary information.
+        # Request the data associated with the given `barcode`.
         response = requests.get(url=self.url(barcode))
         data = response.json()
-        
-        if data["status"] == 1:
-            return product.OFFProduct(data["product"])
-        else:
-            raise ValueError
+
+        return product.OFFProduct(data["product"]) if data["status"] == 1 else None
