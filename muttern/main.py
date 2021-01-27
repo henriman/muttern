@@ -28,9 +28,12 @@ while True:
         barcode_data = barcode.data.decode("utf-8")
 
         with database_handler as dbh:
-            product_name = dbh.get(barcode_data).name
-            # Draw the barcode data and barcode type on the image.
-            cv2.putText(frame, product_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            try:
+                product_name = dbh.get(barcode_data).name
+                # Draw the barcode data and barcode type on the image.
+                cv2.putText(frame, product_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            except ValueError:
+                pass
 
     # Show the output frame.
     cv2.imshow("Barcode scanner", frame)

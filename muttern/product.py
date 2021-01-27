@@ -27,10 +27,10 @@ class OFFProduct(Product):
     def _get_name(self, data: Dict[str, Any]) -> str:
         lc = self.config["localities"]["language_code"]
         product_name_lc = f"product_name_{lc}"
-        keys = [k for k in data.keys() if k.startswith("product_name")]
+        keys = [k for k in data.keys() if k.startswith("product_name") and bool(data[k])]
         if product_name_lc in keys:
             return data[product_name_lc]
-        elif (pn := "product_name") in keys:
+        elif "product_name" in keys:
             return data["product_name"]
         else:
             return data[next(iter(keys))]

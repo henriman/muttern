@@ -87,5 +87,8 @@ class OFFDatabaseHandler(DatabaseHandler):
         # and extract the necessary information.
         response = requests.get(url=self.url(barcode))
         data = response.json()
-
-        return product.OFFProduct(data["product"])
+        
+        if data["status"] == 1:
+            return product.OFFProduct(data["product"])
+        else:
+            raise ValueError
