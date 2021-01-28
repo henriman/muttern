@@ -31,7 +31,7 @@ class Product(abc.ABC):
 class OFFProduct(Product):
     "A product from the Open Food Facts database."
 
-    __slots__ = ("name", "data", "lc")
+    __slots__ = ("name", "data", "lc", "brands")
 
     def __init__(self, data: Dict[str, Any]):
         """Initialize the product."""
@@ -40,6 +40,7 @@ class OFFProduct(Product):
 
         self.lc = self.config["localities"]["language_code"]
         self.name = self._get_name()
+        self.brands = self.data[self._get_key_with_lc("brands")]
 
     def _get_key_with_lc(self, key: str) -> str:
         """Get the key with the language code according to the config file.

@@ -30,9 +30,8 @@ while True:
         with database_handler as dbh:
             product = dbh.get(barcode_data)
             if product:
-                product_name = product.name
                 # Draw the barcode data and barcode type on the image.
-                cv2.putText(frame, product_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.putText(frame, f"{product.brands}: {product.name}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             else:
                 cv2.putText(frame, "Product not found", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
