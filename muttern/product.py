@@ -21,7 +21,6 @@ class Product(abc.ABC):
         """Initialize the product."""
 
         self.data = data
-        self.name = self._get_name()
 
     @abc.abstractmethod
     def _get_name(self) -> str:
@@ -37,8 +36,10 @@ class OFFProduct(Product):
     def __init__(self, data: Dict[str, Any]):
         """Initialize the product."""
 
-        self.lc = self.config["localities"]["language_code"]
         super().__init__(data)
+
+        self.lc = self.config["localities"]["language_code"]
+        self.name = self._get_name()
 
     def _get_key_with_lc(self, key: str) -> str:
         """Get the key with the language code according to the config file.
