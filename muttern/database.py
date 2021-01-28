@@ -1,4 +1,4 @@
-"""This file includes everything to handle accessing the database."""
+"""This module includes everything to handle accessing barcode databases."""
 
 import abc
 from typing import Optional, Dict, Tuple
@@ -87,4 +87,5 @@ class OFFDatabaseHandler(DatabaseHandler):
         response = requests.get(url=self.url(barcode))
         data = response.json()
 
+        # If the barcode was found in the database, return the associated product.
         return product.OFFProduct(data["product"]) if data["status"] == 1 else None
