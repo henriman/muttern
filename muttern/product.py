@@ -23,8 +23,8 @@ class Product(abc.ABC):
         self.data = data
 
     @abc.abstractmethod
-    def _get_name(self) -> str:
-        """Parse the (brand) name of the product from the data."""
+    def _get(self, key: str) -> str:
+        """Return the information associated with the given key."""
 
         pass
 
@@ -38,15 +38,21 @@ class OFFProduct(Product):
 
         super().__init__(data)
 
+        # Gather all necessary information.
         self.lc = self.config["localities"]["language_code"]
-        self.name = self._get_name()
-        self.brands = self.data[self._get_key_with_lc("brands")]
+        self.name = self._get("product_name")
+        self.brands = self._get("brands")
+
+    def _get(self, key: str) -> str:
+        """Return the information associated with the given key."""
+
+        return self.data[self._get_key_with_lc(key)]
 
     def _get_key_with_lc(self, key: str) -> str:
         """Get the key with the language code according to the config file.
 
         If there is no key entry with that language code,
-        return the another one, trying the default first.
+        return another one, trying the default first.
         """
 
         # Find all keys with the `key`.
@@ -61,8 +67,3 @@ class OFFProduct(Product):
             return key
         else:
             return next(iter(keys))
-
-    def _get_name(self) -> str:
-        """Parse the (brand) name of the product from the data."""
-
-        return self.data[self._get_key_with_lc("product_name")]

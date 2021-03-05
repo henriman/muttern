@@ -60,7 +60,7 @@
     ],
     "ecoscore_score": 29.099110495223,
     "ingredients_text_de_ocr_1564216934": "Glukosesirup, Zucker, modifizierte Stärke, Glukose-Fruktose-Sirup, Säuerungsmittel (Citronensäure, Apfelsäure, Milchsäure), Frucht- und Pflanzenkonzentrate (Saflor, Apfel, Zitrone, Rettich, schwarze Johannisbeere), Holunderbeersaft aus Holunderbeersaftkonzentrat, natürliche Aromen, natürliches Orangen-Aroma, Spirulinakonzentrat, pflanzliches Öl (Sonnenblume), Überzugsmittel: Bienenwachs, weiß und gelb.",
-    "brands_tags": [
+    "brandsatags": [
       "katjes"
     ],
     "nova_groups": "4",
@@ -87,8 +87,6 @@
     "purchase_places_tags": [],
     "quantity_debug_tags": [],
     "completeness": 0.8,
-    "product_name_de": "Katjes Grün-ohr Bärchen",
-    "product_name": "Katjes Grün-ohr Bärchen",
     "lang": "de",
     "compared_to_category": "en:gelified-candies",
     "quantity": "200 g",
@@ -889,7 +887,6 @@
     "other_nutritional_substances_tags": [],
     "nutriscore_score_opposite": -14,
     "ingredients_text_debug": "Glukosesirup, Zucker, modifizierte Stärke, Glukose-Fruktose-Sirup, Säuerungsmittel (Citronensäure, Apfelsäure, Milchsäure), Frucht - und Pflanzenkonzentrate (Saflor, Apfel, Zitrone, Rettich, schwarze Johannisbeere), Holunderbeersaft aus Holunderbeersaftkonzentrat, natürliche Aromen, natürliches Orangen-Aroma, Spirulinakonzentrat, pflanzliches Öl (Sonnenblume), Überzugsmittel: Bienenwachs, weiß und gelb.",
-    "brands": "Katjes",
     "ingredients_text_fr": "",
     "nutrition_data_per": "100g",
     "codes_tags": [
@@ -898,7 +895,7 @@
       "403740043xxxx",
       "40374004xxxxx",
       "4037400xxxxxx",
-      "403740xxxxxxx",
+      "403740xxxxxxxa
       "40374xxxxxxxx",
       "4037xxxxxxxxx",
       "403xxxxxxxxxx",
