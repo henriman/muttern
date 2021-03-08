@@ -1,13 +1,13 @@
 """This module includes everything to handle accessing barcode databases."""
 
 import abc
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, Generic
 import pathlib
 import pickle
 import requests
 import product
 
-class DatabaseHandler(abc.ABC):
+class DatabaseHandler(abc.ABC, Generic[product.P]):
     """A default interface for handling access to an EAN database.
 
     To improve performance, results will be cached and saved to a file locally,
@@ -23,7 +23,7 @@ class DatabaseHandler(abc.ABC):
         """Initialize the database handler."""
 
         # Initalize an empty cache.
-        self.products: Dict[str, Optional[product.Product]] = dict()
+        self.products: Dict[str, Optional[product.P]] = dict()
 
         # If a location for the local cache was provided, create a Path object from it.
         self.path: Optional[pathlib.Path] = None
@@ -31,12 +31,12 @@ class DatabaseHandler(abc.ABC):
             self.path = pathlib.Path(cache_location)
 
     @abc.abstractmethod
-    def _get(self, barcode: str) -> Optional[product.Product]:
+    def _get(self, barcode: str) -> Optional[product.P]:
         """Request the product associated with the given `barcode` from the database."""
 
         pass
 
-    def get(self, barcode: str) -> Optional[product.Product]:
+    def get(self, barcode: str) -> Optional[product.P]:
         """Return the product associated with the given `barcode`.
 
         Store the result in the cache for re-use.
@@ -69,7 +69,7 @@ class DatabaseHandler(abc.ABC):
             with self.path.open(mode="wb") as local_database:
                 pickle.dump(self.products, local_database)
 
-class OFFDatabaseHandler(DatabaseHandler):
+class OFFDatabaseHandler(DatabaseHandler[product.OFFProduct]):
     """A class for handling access to the Open Food Facts database."""
 
     __slots__ = ("products", "path")

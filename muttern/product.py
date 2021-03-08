@@ -6,7 +6,7 @@
 import abc
 import configparser
 import database
-from typing import Dict, Any, Tuple, Union
+from typing import Dict, Any, Tuple, Union, TypeVar
 
 class Product(abc.ABC):
     "A default interface for working with a product."
@@ -69,3 +69,5 @@ class OFFProduct(Product):
             return key
         else:
             return next(iter(keys))
+
+P = TypeVar("P", bound=Product)
