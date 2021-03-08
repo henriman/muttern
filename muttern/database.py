@@ -19,16 +19,16 @@ class DatabaseHandler(abc.ABC):
 
     __slots__: Tuple[str, ...] = tuple()
 
-    def __init__(self, local_location: Optional[str] = None) -> None:
+    def __init__(self, cache_location: Optional[str] = None) -> None:
         """Initialize the database handler."""
 
         # Initalize an empty cache.
         self.products: Dict[str, Optional[product.Product]] = dict()
 
-        # If a location for the local database was provided, create a Path object from it.
+        # If a location for the local cache was provided, create a Path object from it.
         self.path: Optional[pathlib.Path] = None
-        if local_location is not None:
-            self.path = pathlib.Path(local_location)
+        if cache_location is not None:
+            self.path = pathlib.Path(cache_location)
 
     @abc.abstractmethod
     def _get(self, barcode: str) -> Optional[product.Product]:
@@ -53,7 +53,7 @@ class DatabaseHandler(abc.ABC):
     def __enter__(self) -> "DatabaseHandler":
         """Initialize the cache and enter into the context manager."""
 
-        # If a location for the local database was provided and it already exists,
+        # If a location for the local cache was provided and it already exists,
         # deserialize the cache from it.
         if self.path is not None and self.path.is_file():
             with self.path.open(mode="rb") as local_database:

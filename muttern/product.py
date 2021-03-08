@@ -43,6 +43,8 @@ class OFFProduct(Product):
         self.name = self._get("product_name")
         self.brands = self._get("brands")
 
+        # TODO: add more information
+
     def _get(self, key: str) -> str:
         """Return the information associated with the given key."""
 

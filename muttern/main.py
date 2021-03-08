@@ -10,7 +10,7 @@ import database
 video_stream = video.VideoStream(usePiCamera=True).start()
 time.sleep(2)  # Allow the camera sensor to warm up.
 
-database_handler = database.OFFDatabaseHandler(local_location=None)
+database_handler = database.OFFDatabaseHandler(cache_location=None)
 
 while True:
     # Grab the current frame from the video stream.
