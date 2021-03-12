@@ -1,94 +1,77 @@
-import guizero
-import imutils.video as video
+import tkinter as tk
+from PIL import Image, ImageTk
 import time
 import imutils
-from pyzbar import pyzbar
-import requests
+import imutils.video as video
 import cv2
 import database
-import sys
+from pyzbar import pyzbar
 
-def exit_app(video_stream):
-    video_stream.stop()
-    sys.exit()
-
-# Configure the app.
-app = guizero.App(
-    title="muttern",
-    bg=(255, 255, 255)
-)
-app.tk.attributes("-fullscreen", True)
-app.tk.bind("<Escape>", lambda _: app.destroy())
-
-# Add the widgets.
-barcode = guizero.Text(app)
-brand = guizero.Text(app)
-name = guizero.Text(app)
-
-app.display()
-
-# Initialize the video stream.
-video_stream = video.VideoStream(usePiCamera=True).start()
-time.sleep(2)  # Allow the camera sensor to warm up.
-app.on_close(lambda: exit_app(video_stream))
-
-# Initialize the database handler.
-database_handler = database.OFFDatabaseHandler(cache_location=None)
-with database_handler as dbh:
-    while True:
-        # Grab the current frame of the frame from the video stream.
-        frame = video_stream.read()
-        frame = imutils.resize(frame, width=400)  # Resize to improve performance.
-
-        # Find and decode the barcodes in the frame.
-        barcodes = pyzbar.decode(frame)
-
-        for barcode in barcodes:
-            # Convert the barcode data into a string.
-            barcode_data = barcode.data.decode("utf-8")
-
-            product = dbh.get(barcode_data)
-            if product:
-                barcode.clear()
-                barcode.append(barcode_data)
-                brand.clear()
-                brand.append(product.brands)
-                name.clear()
-                name.append(product.name)
-
-"""
-while True:
-    # Grab the current frame from the video stream.
+def stream():
+    # Grab the current frame of the video stream.
     frame = video_stream.read()
-    frame = imutils.resize(frame, width=400)  # Resize to improve performance.
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB color space.
+
+    # Display frame.
+    display_image = Image.fromarray(frame)
+    display_image = ImageTk.PhotoImage(display_image)
+    image.config(image=display_image)
+    image.image = display_image
+
+    frame = imutils.resize(frame, width=320)  # Resize to improve performance.
 
     # Find and decode the barcodes in the frame.
     barcodes = pyzbar.decode(frame)
 
     for barcode in barcodes:
-        # Extract the bounding box location of the barcode and draw it.
-        # (x, y, w, h) = barcode.rect
-
-        # Convert the barocde data into a string.
+        # Convert the barcode data into a string.
         barcode_data = barcode.data.decode("utf-8")
 
-        with database_handler as dbh:
-            product = dbh.get(barcode_data)
-            if product:
-                # Draw the barcode data and barcode type on the image.
-                # cv2.putText(frame, f"{product.brands}: {product.name}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-            # else:
-                # cv2.putText(frame, "Product not found", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # Get the product from the database and display it.
+        product = dbh.get(barcode_data)
+        if product:
+            barcode_text.set(barcode_data)
+            brand_text.set(product.brands)
+            name_text.set(product.name)
 
-    # Show the output frame.
-    # cv2.imshow("Barcode scanner", frame)
-    # key = cv2.waitKey(1) & 0xff
+    # Continue streaming video.
+    image.after(delay, stream)
 
-    # If the `q` key was pressed, break from the loop.
-    if key == ord("q"):
-        break
+# Configure window.
+root = tk.Tk()
+root.title('muttern')
+#root.attributes("-fullscreen", True)
+root.bind("<Escape>", lambda _: root.destroy())
 
-cv2.destroyAllWindows()
+# Variables.
+barcode_text = tk.StringVar()
+brand_text = tk.StringVar()
+name_text = tk.StringVar()
+
+# Add the widgets.
+image = tk.Label()
+image.pack()
+
+barcode_label = tk.Label(root, textvariable=barcode_text)
+barcode_label.pack()
+brand_label = tk.Label(root, textvariable=brand_text)
+brand_label.pack()
+name_label = tk.Label(root, textvariable=name_text)
+name_label.pack()
+
+# Initialize the video stream.
+video_stream = video.VideoStream(usePiCamera=True, resolution=(640, 480)).start()
+# TODO: let sleep asynchronously?
+time.sleep(2)  # Allow the camera sensor to warm up.
+
+delay = int(1000 / video_stream.camera.framerate)
+
+# Initialize the database handler.
+database_handler = database.OFFDatabaseHandler(cache_location=None)
+with database_handler as dbh:
+    stream()
+
+root.mainloop()
+
+# Stop the stream after the window was closed.
 video_stream.stop()
-"""
-
