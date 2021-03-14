@@ -12,6 +12,12 @@ from typing import Callable, Any
 def str_to_tuple(s: str, f: Callable[[str], Any]):
     return tuple(map(f, s.strip("()").split(", ")))
 
+def show_frame(frame) -> None:
+    display_image = Image.fromarray(frame)
+    display_image = ImageTk.PhotoImage(display_image)
+    image.config(image=display_image)
+    image.image = display_image
+
 config = configparser.ConfigParser()
 config.read("config.ini")
 
@@ -19,18 +25,13 @@ screen_size = str_to_tuple(config["hardware"]["screen_size"], int)
 resolution = str_to_tuple(config["hardware"]["resolution"], int)
 framerate = config["hardware"].getint("framerate")
 
-def stream():
+def stream() -> None:
     # Grab the current frame of the video stream.
     frame = video_stream.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB color space.
 
     # Display frame.
-    display_image = Image.fromarray(frame)
-    display_image = ImageTk.PhotoImage(display_image)
-    image.config(image=display_image)
-    image.image = display_image
-
-    frame = imutils.resize(frame, width=320)  # Resize to improve performance.
+    show_frame(frame)
 
     # Find and decode the barcodes in the frame.
     barcodes = pyzbar.decode(frame)
@@ -46,9 +47,15 @@ def stream():
         # Convert the barcode data into a string.
         barcode_data = barcode.data.decode("utf-8")
 
+        (x, y, w, h) = barcode.rect
+
         # Get the product from the database and display it.
         product = dbh.get(barcode_data)
         if product:
+            # Display frame with a rectangle drawn around the barcode.
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            show_frame(frame)
+
             barcode_text.set(barcode_data)
             brand_text.set(product.brands)
             name_text.set(product.name)
@@ -70,11 +77,23 @@ name_text = tk.StringVar()
 image = tk.Label()
 image.grid(rowspan=5)
 
-barcode_label = tk.Label(root, textvariable=barcode_text)
+barcode_label = tk.Label(
+    root,
+    textvariable=barcode_text,
+    wraplength=screen_size[0] - resolution[0]
+)
 barcode_label.grid(row=0, column=1, sticky="N")
-brand_label = tk.Label(root, textvariable=brand_text)
+brand_label = tk.Label(
+    root,
+    textvariable=brand_text,
+    wraplength=screen_size[0] - resolution[0]
+)
 brand_label.grid(row=1, column=1, sticky="N")
-name_label = tk.Label(root, textvariable=name_text)
+name_label = tk.Label(
+    root,
+    textvariable=name_text,
+    wraplength=screen_size[0] - resolution[0]
+)
 name_label.grid(row=2, column=1, sticky="N")
 
 confirm_button = tk.Button(
