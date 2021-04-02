@@ -82,27 +82,36 @@ barcode_label = tk.Label(
     textvariable=barcode_text,
     wraplength=screen_size[0] - resolution[0]
 )
-barcode_label.grid(row=0, column=1, sticky="N")
+barcode_label.grid(row=0, column=1, sticky="NE")
 brand_label = tk.Label(
     root,
     textvariable=brand_text,
     wraplength=screen_size[0] - resolution[0]
 )
-brand_label.grid(row=1, column=1, sticky="N")
+brand_label.grid(row=1, column=1, sticky="NE")
 name_label = tk.Label(
     root,
     textvariable=name_text,
     wraplength=screen_size[0] - resolution[0]
 )
-name_label.grid(row=2, column=1, sticky="N")
+name_label.grid(row=2, column=1, sticky="NE")
 
 confirm_button = tk.Button(
     root,
     state=tk.DISABLED,
     text="Confirm",
+    width=screen_size[0]-resolution[0],
     command=lambda: image.after(delay, stream)
 )
-confirm_button.grid(row=3, column=1, sticky="N")
+confirm_button.grid(row=3, column=1, sticky="NE")
+
+dismiss_button = tk.Button(
+    root,
+    state=tk.DISABLED,
+    text="Dismiss",
+    command=lambda: image.after(delay, stream)
+)
+dismiss_button.grid(row=4, column=1)
 
 # Initialize the video stream.
 video_stream = video.VideoStream(
