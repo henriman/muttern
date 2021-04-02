@@ -82,36 +82,52 @@ barcode_label = tk.Label(
     textvariable=barcode_text,
     wraplength=screen_size[0] - resolution[0]
 )
-barcode_label.grid(row=0, column=1, sticky="NE")
+barcode_label.grid(row=0, column=1, sticky="NS")
 brand_label = tk.Label(
     root,
     textvariable=brand_text,
     wraplength=screen_size[0] - resolution[0]
 )
-brand_label.grid(row=1, column=1, sticky="NE")
+brand_label.grid(row=1, column=1, sticky="NS")
 name_label = tk.Label(
     root,
     textvariable=name_text,
     wraplength=screen_size[0] - resolution[0]
 )
-name_label.grid(row=2, column=1, sticky="NE")
+name_label.grid(row=2, column=1, sticky="NS")
 
+# Tkinter size specifications suck.
+confirm_image = Image.open("checkmark.png")
+confirm_image = confirm_image.resize(
+    (confirm_image.width // 2, confirm_image.height // 2)
+)
+confirm_image = ImageTk.PhotoImage(confirm_image)
 confirm_button = tk.Button(
     root,
     state=tk.DISABLED,
-    text="Confirm",
-    width=screen_size[0]-resolution[0],
+    width=151,
+    height=111,
+    image=confirm_image,
     command=lambda: image.after(delay, stream)
 )
-confirm_button.grid(row=3, column=1, sticky="NE")
+confirm_button.grid(row=3, column=1, sticky="NSEW")
+confirm_button.grid_propagate(0)
 
+dismiss_image = Image.open("cross.png")
+dismiss_image = dismiss_image.resize(
+    (dismiss_image.width // 2, dismiss_image.height // 2)
+)
+dismiss_image = ImageTk.PhotoImage(dismiss_image)
 dismiss_button = tk.Button(
     root,
     state=tk.DISABLED,
-    text="Dismiss",
+    width=151,
+    height=111,
+    image=dismiss_image,
     command=lambda: image.after(delay, stream)
 )
-dismiss_button.grid(row=4, column=1)
+dismiss_button.grid(row=4, column=1, sticky="NSEW")
+dismiss_button.grid_propagate(0)
 
 # Initialize the video stream.
 video_stream = video.VideoStream(
