@@ -80,7 +80,7 @@ class GUI(tk.Tk):
 
         # Retrieve the image for the confirm button and scale it down.
         # Note that you must keep a reference to the image object.
-        confirm_image = Image.open("assets/checkmark.png")
+        confirm_image = Image.open("muttern/assets/checkmark.png")
         confirm_image = confirm_image.resize(
             (confirm_image.width // 2, confirm_image.height // 2)
         )
@@ -100,7 +100,7 @@ class GUI(tk.Tk):
 
         # Retrieve the image for the dismiss button and scale it down.
         # Note that you must keep a reference to the image object.
-        dismiss_image = Image.open("assets/cross.png")
+        dismiss_image = Image.open("muttern/assets/cross.png")
         dismiss_image = dismiss_image.resize(
             (dismiss_image.width // 2, dismiss_image.height // 2)
         )
