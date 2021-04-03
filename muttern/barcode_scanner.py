@@ -1,11 +1,10 @@
 import configparser
 import time
-# import imutils FIXME: necessary?
 import imutils.video as video
 from pyzbar import pyzbar
 import numpy
 import cv2
-from typing import Callable, Any, Optional, Tuple, List
+from typing import Tuple, List
 import product
 import config as cfg
 import database

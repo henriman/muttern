@@ -1,10 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-import cv2
-import database
 import configparser
-from typing import Callable, Any, Optional, Tuple, List
-import product
+from typing import Any
 import barcode_scanner
 import config as cfg
 import numpy
