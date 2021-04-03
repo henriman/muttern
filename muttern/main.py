@@ -18,12 +18,12 @@ class ImageLabel(tk.Label):
 
 class GUI(tk.Tk):
 
-    config = configparser.ConfigParser()
-    config.read("config.ini")
+    configuration = configparser.ConfigParser()
+    configuration.read("config.ini")
 
-    screen_size = cfg.str_to_tuple(config["hardware"]["screen_size"], int)
-    resolution = cfg.str_to_tuple(config["hardware"]["resolution"], int)
-    framerate = config["hardware"].getint("framerate")
+    screen_size = cfg.str_to_tuple(configuration["hardware"]["screen_size"], int)
+    resolution = cfg.str_to_tuple(configuration["hardware"]["resolution"], int)
+    framerate = configuration["hardware"].getint("framerate")
 
     stream_delay = int(1000 / framerate)
 
