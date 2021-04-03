@@ -3,7 +3,7 @@ import time
 # import imutils FIXME: necessary?
 import imutils.video as video
 from pyzbar import pyzbar
-import numpy.typing as npt
+import numpy
 import cv2
 from typing import Callable, Any, Optional, Tuple, List
 import product
@@ -29,7 +29,7 @@ class BarcodeScanner:
 
         self.dbh = database_handler
 
-    def get_current_frame(self) -> npt.ArrayLike:
+    def get_current_frame(self) -> numpy.ndarray:
         """Return the current frame of the video stream."""
 
         # Grab the current frame and convert it to the right color space.
@@ -38,7 +38,7 @@ class BarcodeScanner:
 
         return frame
 
-    def scan(self, frame: npt.ArrayLike) -> List[Tuple[Tuple[int, int, int, int], product.P]]:
+    def scan(self, frame: numpy.ndarray) -> List[Tuple[Tuple[int, int, int, int], product.P]]:
         """Scan for barcodes in the given frame; return the corresponding products."""
 
         # Find and decode the barcodes in the frame.
@@ -59,7 +59,7 @@ class BarcodeScanner:
 
         return products
 
-    def get_and_scan_current_frame(self) -> Tuple[npt.ArrayLike, List[product.P]]:
+    def get_and_scan_current_frame(self) -> Tuple[numpy.ndarray, List[product.P]]:
 
         # Grab the current frame.
         frame = self.get_current_frame()

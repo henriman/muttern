@@ -7,10 +7,10 @@ from typing import Callable, Any, Optional, Tuple, List
 import product
 import barcode_scanner
 import config as cfg
-import numpy.typing as npt
+import numpy
 
 class ImageLabel(tk.Label):
-    def update_image(self, image: npt.ArrayLike) -> None:
+    def update_image(self, image: numpy.ndarray) -> None:
         display_image = Image.fromarray(image)
         display_image = ImageTk.PhotoImage(display_image)
         self.config(image=display_image)
@@ -37,6 +37,7 @@ class GUI(tk.Tk):
         # Configure the window.
         self.title("muttern")
         self.geometry(f"{self.screen_size[0]}x{self.screen_size[1]}")
+        self.configure(bg="white")
         # TODO: translate to fullscreen
         # root.attributes("-fullscreen", True)
         self.bind("<Escape>", lambda _: self.destroy())
@@ -47,12 +48,13 @@ class GUI(tk.Tk):
         self.name_text = tk.StringVar()
 
         # Create the widgets.
-        self.image = ImageLabel()
+        self.image = ImageLabel(self, bg="white")
         self.image.grid(rowspan=5)
 
         # Label which shows the scanned barcode.
         self.barcode_label = tk.Label(
             self,
+            bg="white",
             textvariable=self.barcode_text,
             wraplength=self.screen_size[0] - self.resolution[0]
         )
@@ -61,6 +63,7 @@ class GUI(tk.Tk):
         # Label which shows the brand of the scanned item.
         self.brand_label = tk.Label(
             self,
+            bg="white",
             textvariable=self.brand_text,
             wraplength=self.screen_size[0] - self.resolution[0]
         )
@@ -69,48 +72,49 @@ class GUI(tk.Tk):
         # Label which shows the name of the scanned item.
         self.name_label = tk.Label(
             self,
+            bg="white",
             textvariable=self.name_text,
             wraplength=self.screen_size[0] - self.resolution[0]
         )
         self.name_label.grid(row=2, column=1, sticky="NS")
 
         # Retrieve the image for the confirm button and scale it down.
+        # Note that you must keep a reference to the image object.
         confirm_image = Image.open("checkmark.png")
         confirm_image = confirm_image.resize(
             (confirm_image.width // 2, confirm_image.height // 2)
         )
-        confirm_image = ImageTk.PhotoImage(confirm_image)
+        self.confirm_image = ImageTk.PhotoImage(confirm_image)
         # FIXME: Tkinter size specifications suck;
         # specifying the right width and height won't actually make widgets that size.
         self.confirm_button = tk.Button(
             self,
             state=tk.DISABLED,
-            width=151,
-            height=111,
-            image=confirm_image,
+            bg="white",
+            width=152,
+            height=120,
+            image=self.confirm_image,
             command=lambda: self.image.after(self.stream_delay, self.stream)
         )
         self.confirm_button.grid(row=3, column=1, sticky="NSEW")
-        # TODO: Is propagate necessary?
-        # TODO: set to True or False instead of 0?
-        # self.confirm_button.grid_propagate(0)
 
         # Retrieve the image for the dismiss button and scale it down.
+        # Note that you must keep a reference to the image object.
         dismiss_image = Image.open("cross.png")
         dismiss_image = dismiss_image.resize(
             (dismiss_image.width // 2, dismiss_image.height // 2)
         )
-        dismiss_image = ImageTk.PhotoImage(dismiss_image)
+        self.dismiss_image = ImageTk.PhotoImage(dismiss_image)
         self.dismiss_button = tk.Button(
             self,
             state=tk.DISABLED,
-            width=151,
-            height=111,
-            image=dismiss_image,
+            bg="white",
+            width=152,
+            height=120,
+            image=self.dismiss_image,
             command=lambda: self.image.after(self.stream_delay, self.stream)
         )
         self.dismiss_button.grid(row=4, column=1, sticky="NSEW")
-        # self.dismiss_button.grid_propagate(0)
 
     def stream(self) -> None:
         # Get the current frame and scan it for barcodes.
@@ -135,4 +139,5 @@ class GUI(tk.Tk):
 with database.OFFDatabaseHandler(cache_location=None) as dbh:
     with barcode_scanner.BarcodeScanner(dbh) as scanner:
         gui = GUI(scanner)
+        gui.stream()
         gui.mainloop()
