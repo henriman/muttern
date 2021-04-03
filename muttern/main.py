@@ -1,151 +1,138 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-import time
-import imutils
-import imutils.video as video
 import cv2
 import database
-from pyzbar import pyzbar
 import configparser
-from typing import Callable, Any
+from typing import Callable, Any, Optional, Tuple, List
+import product
+import barcode_scanner
+import config as cfg
+import numpy.typing as npt
 
-def str_to_tuple(s: str, f: Callable[[str], Any]):
-    return tuple(map(f, s.strip("()").split(", ")))
+class ImageLabel(tk.Label):
+    def update_image(self, image: npt.ArrayLike) -> None:
+        display_image = Image.fromarray(image)
+        display_image = ImageTk.PhotoImage(display_image)
+        self.config(image=display_image)
+        self.image = display_image
 
-def show_frame(frame) -> None:
-    display_image = Image.fromarray(frame)
-    display_image = ImageTk.PhotoImage(display_image)
-    image.config(image=display_image)
-    image.image = display_image
+class GUI(tk.Tk):
 
-config = configparser.ConfigParser()
-config.read("config.ini")
+    config = configparser.ConfigParser()
+    config.read("config.ini")
 
-screen_size = str_to_tuple(config["hardware"]["screen_size"], int)
-resolution = str_to_tuple(config["hardware"]["resolution"], int)
-framerate = config["hardware"].getint("framerate")
+    screen_size = cfg.str_to_tuple(config["hardware"]["screen_size"], int)
+    resolution = cfg.str_to_tuple(config["hardware"]["resolution"], int)
+    framerate = config["hardware"].getint("framerate")
 
-def stream() -> None:
-    # Grab the current frame of the video stream.
-    frame = video_stream.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB color space.
+    stream_delay = int(1000 / framerate)
 
-    # Display frame.
-    show_frame(frame)
+    def __init__(self, barcode_scanner: barcode_scanner.BarcodeScanner) -> None:
+        """Initialize the GUI."""
 
-    # Find and decode the barcodes in the frame.
-    barcodes = pyzbar.decode(frame)
+        super().__init__()
 
-    if not barcodes:
-        # Continue streaming video.
-        image.after(delay, stream)
-        confirm_button.config(state=tk.DISABLED)
-    else:
-        confirm_button.config(state=tk.NORMAL)
+        self.barcode_scanner = barcode_scanner
 
-    for barcode in barcodes:
-        # Convert the barcode data into a string.
-        barcode_data = barcode.data.decode("utf-8")
+        # Configure the window.
+        self.title("muttern")
+        self.geometry(f"{self.screen_size[0]}x{self.screen_size[1]}")
+        # TODO: translate to fullscreen
+        # root.attributes("-fullscreen", True)
+        self.bind("<Escape>", lambda _: self.destroy())
 
-        (x, y, w, h) = barcode.rect
+        # Create string variables.
+        self.barcode_text = tk.StringVar()
+        self.brand_text = tk.StringVar()
+        self.name_text = tk.StringVar()
 
-        # Get the product from the database and display it.
-        product = dbh.get(barcode_data)
-        if product:
-            # Display frame with a rectangle drawn around the barcode.
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            show_frame(frame)
+        # Create the widgets.
+        self.image = ImageLabel()
+        self.image.grid(rowspan=5)
 
-            barcode_text.set(barcode_data)
-            brand_text.set(product.brands)
-            name_text.set(product.name)
+        # Label which shows the scanned barcode.
+        self.barcode_label = tk.Label(
+            self,
+            textvariable=self.barcode_text,
+            wraplength=self.screen_size[0] - self.resolution[0]
+        )
+        self.barcode_label.grid(row=0, column=1, sticky="NS")
 
-# Configure window.
-root = tk.Tk()
-root.title('muttern')
-root.geometry(f"{screen_size[0]}x{screen_size[1]}")
-# TODO: translate to fullscreen
-# root.attributes("-fullscreen", True)
-root.bind("<Escape>", lambda _: root.destroy())
+        # Label which shows the brand of the scanned item.
+        self.brand_label = tk.Label(
+            self,
+            textvariable=self.brand_text,
+            wraplength=self.screen_size[0] - self.resolution[0]
+        )
+        self.brand_label.grid(row=1, column=1, sticky="NS")
 
-# Variables.
-barcode_text = tk.StringVar()
-brand_text = tk.StringVar()
-name_text = tk.StringVar()
+        # Label which shows the name of the scanned item.
+        self.name_label = tk.Label(
+            self,
+            textvariable=self.name_text,
+            wraplength=self.screen_size[0] - self.resolution[0]
+        )
+        self.name_label.grid(row=2, column=1, sticky="NS")
 
-# Add the widgets.
-image = tk.Label()
-image.grid(rowspan=5)
+        # Retrieve the image for the confirm button and scale it down.
+        confirm_image = Image.open("checkmark.png")
+        confirm_image = confirm_image.resize(
+            (confirm_image.width // 2, confirm_image.height // 2)
+        )
+        confirm_image = ImageTk.PhotoImage(confirm_image)
+        # FIXME: Tkinter size specifications suck;
+        # specifying the right width and height won't actually make widgets that size.
+        self.confirm_button = tk.Button(
+            self,
+            state=tk.DISABLED,
+            width=151,
+            height=111,
+            image=confirm_image,
+            command=lambda: self.image.after(self.stream_delay, self.stream)
+        )
+        self.confirm_button.grid(row=3, column=1, sticky="NSEW")
+        # TODO: Is propagate necessary?
+        # TODO: set to True or False instead of 0?
+        # self.confirm_button.grid_propagate(0)
 
-barcode_label = tk.Label(
-    root,
-    textvariable=barcode_text,
-    wraplength=screen_size[0] - resolution[0]
-)
-barcode_label.grid(row=0, column=1, sticky="NS")
-brand_label = tk.Label(
-    root,
-    textvariable=brand_text,
-    wraplength=screen_size[0] - resolution[0]
-)
-brand_label.grid(row=1, column=1, sticky="NS")
-name_label = tk.Label(
-    root,
-    textvariable=name_text,
-    wraplength=screen_size[0] - resolution[0]
-)
-name_label.grid(row=2, column=1, sticky="NS")
+        # Retrieve the image for the dismiss button and scale it down.
+        dismiss_image = Image.open("cross.png")
+        dismiss_image = dismiss_image.resize(
+            (dismiss_image.width // 2, dismiss_image.height // 2)
+        )
+        dismiss_image = ImageTk.PhotoImage(dismiss_image)
+        self.dismiss_button = tk.Button(
+            self,
+            state=tk.DISABLED,
+            width=151,
+            height=111,
+            image=dismiss_image,
+            command=lambda: self.image.after(self.stream_delay, self.stream)
+        )
+        self.dismiss_button.grid(row=4, column=1, sticky="NSEW")
+        # self.dismiss_button.grid_propagate(0)
 
-# Tkinter size specifications suck.
-confirm_image = Image.open("checkmark.png")
-confirm_image = confirm_image.resize(
-    (confirm_image.width // 2, confirm_image.height // 2)
-)
-confirm_image = ImageTk.PhotoImage(confirm_image)
-confirm_button = tk.Button(
-    root,
-    state=tk.DISABLED,
-    width=151,
-    height=111,
-    image=confirm_image,
-    command=lambda: image.after(delay, stream)
-)
-confirm_button.grid(row=3, column=1, sticky="NSEW")
-confirm_button.grid_propagate(0)
+    def stream(self) -> None:
+        # Get the current frame and scan it for barcodes.
+        products: Any  # TODO: actual type
+        (frame, products) = self.barcode_scanner.get_and_scan_current_frame()
 
-dismiss_image = Image.open("cross.png")
-dismiss_image = dismiss_image.resize(
-    (dismiss_image.width // 2, dismiss_image.height // 2)
-)
-dismiss_image = ImageTk.PhotoImage(dismiss_image)
-dismiss_button = tk.Button(
-    root,
-    state=tk.DISABLED,
-    width=151,
-    height=111,
-    image=dismiss_image,
-    command=lambda: image.after(delay, stream)
-)
-dismiss_button.grid(row=4, column=1, sticky="NSEW")
-dismiss_button.grid_propagate(0)
+        # Display frame.
+        self.image.update_image(frame)
 
-# Initialize the video stream.
-video_stream = video.VideoStream(
-    usePiCamera=True,
-    framerate=framerate,
-    resolution=resolution
-).start()
-# TODO: let sleep asynchronously?
-time.sleep(2)  # Allow the camera sensor to warm up.
+        if not products:
+            # Continue streaming video.
+            self.image.after(self.stream_delay, self.stream)
+            self.confirm_button.config(state=tk.DISABLED)
+        else:
+            self.confirm_button.config(state=tk.NORMAL)
 
-delay = int(1000 / video_stream.camera.framerate)
+        for product in products:
+            self.barcode_text.set(product.barcode)
+            self.brand_text.set(product.brands)
+            self.name_text.set(product.name)
 
-# Initialize the database handler.
-database_handler = database.OFFDatabaseHandler(cache_location=None)
-with database_handler as dbh:
-    stream()
-
-root.mainloop()
-
-# Stop the stream after the window was closed.
-video_stream.stop()
+with database.OFFDatabaseHandler(cache_location=None) as dbh:
+    with barcode_scanner.BarcodeScanner(dbh) as scanner:
+        gui = GUI(scanner)
+        gui.mainloop()

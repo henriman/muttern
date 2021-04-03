@@ -87,5 +87,5 @@ class OFFDatabaseHandler(DatabaseHandler[product.OFFProduct]):
         response = requests.get(url=self.url(barcode))
         data = response.json()
 
-        # If the barcode was found in the database, return the associated product.
-        return product.OFFProduct(data["product"]) if data["status"] == 1 else None
+        # If the barcode was found in the database, return the corresponding product.
+        return product.OFFProduct(barcode, data["product"]) if data["status"] == 1 else None

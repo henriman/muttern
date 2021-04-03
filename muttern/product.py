@@ -17,9 +17,10 @@ class Product(abc.ABC):
     config = configparser.ConfigParser()
     config.read("config.ini")
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, barcode: str, data: Dict[str, Any]):
         """Initialize the product."""
 
+        self.barcode = barcode
         self.data = data
 
     @abc.abstractmethod
@@ -31,12 +32,12 @@ class Product(abc.ABC):
 class OFFProduct(Product):
     "A product from the Open Food Facts database."
 
-    __slots__ = ("name", "data", "lc", "brands")
+    __slots__ = ("barcode", "data", "lc", "name", "brands")
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, barcode: str, data: Dict[str, Any]):
         """Initialize the product."""
 
-        super().__init__(data)
+        super().__init__(barcode, data)
 
         # Gather all necessary information.
         self.lc = self.config["localities"]["language_code"]
