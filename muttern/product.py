@@ -32,7 +32,9 @@ class Product(abc.ABC):
 class OFFProduct(Product):
     "A product from the Open Food Facts database."
 
-    __slots__ = ("barcode", "data", "lc", "name", "brands")
+    __slots__ = ("barcode", "data", "name", "brands")
+
+    lc = self.config["localities"]["language_code"]
 
     def __init__(self, barcode: str, data: Dict[str, Any]):
         """Initialize the product."""
@@ -40,7 +42,7 @@ class OFFProduct(Product):
         super().__init__(barcode, data)
 
         # Gather all necessary information.
-        self.lc = self.config["localities"]["language_code"]
+        # self.lc = self.config["localities"]["language_code"]
         self.name = self._get("product_name")
         self.brands = self._get("brands")
 
