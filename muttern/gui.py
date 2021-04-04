@@ -1,3 +1,5 @@
+"""This module includes all GUI elements."""
+
 import tkinter as tk
 from PIL import Image, ImageTk
 import configparser
@@ -7,13 +9,18 @@ import config as cfg
 import numpy
 
 class ImageLabel(tk.Label):
+    """A label with an updatable image."""
+
     def update_image(self, image: numpy.ndarray) -> None:
+        """Update the label with the given image."""
+
         display_image = Image.fromarray(image)
         display_image = ImageTk.PhotoImage(display_image)
         self.config(image=display_image)
         self.image = display_image
 
-class GUI(tk.Tk):
+class BarcodeScannerGUI(tk.Tk):
+    """The barcode scanner GUI."""
 
     configuration = configparser.ConfigParser()
     configuration.read("config.ini")
@@ -114,6 +121,8 @@ class GUI(tk.Tk):
         self.dismiss_button.grid(row=4, column=1, sticky="NSEW")
 
     def stream(self) -> None:
+        """Update the GUI with the current frame; scan for barcodes and show product information."""
+
         # Get the current frame and scan it for barcodes.
         products: Any  # TODO: actual type
         (frame, products) = self.barcode_scanner.get_and_scan_current_frame()
@@ -128,6 +137,7 @@ class GUI(tk.Tk):
         else:
             self.confirm_button.config(state=tk.NORMAL)
 
+        # Show product information in GUI.
         for product in products:
             self.barcode_text.set(product.barcode)
             self.brand_text.set(product.brands)

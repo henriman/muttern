@@ -1,3 +1,5 @@
+"""This module includes a class to operate a PiCamera as a barcode scanner."""
+
 import configparser
 import time
 import imutils.video as video
@@ -10,6 +12,7 @@ import config as cfg
 import database
 
 class BarcodeScanner:
+    """A barcode scanner using a PiCamera."""
 
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -25,7 +28,6 @@ class BarcodeScanner:
             framerate=self.framerate,
             resolution=self.resolution
         )
-
         self.dbh = database_handler
 
     def get_current_frame(self) -> numpy.ndarray:
@@ -38,7 +40,7 @@ class BarcodeScanner:
         return frame
 
     def scan(self, frame: numpy.ndarray) -> List[Tuple[Tuple[int, int, int, int], product.P]]:
-        """Scan for barcodes in the given frame; return the corresponding products."""
+        """Scan for barcodes in the given frame; return their position and corresponding product."""
 
         # Find and decode the barcodes in the frame.
         barcodes = pyzbar.decode(frame)
@@ -59,6 +61,7 @@ class BarcodeScanner:
         return products
 
     def get_and_scan_current_frame(self) -> Tuple[numpy.ndarray, List[product.P]]:
+        """Scan the current frame for barcodes; draw their outline and return the found products."""
 
         # Grab the current frame.
         frame = self.get_current_frame()
