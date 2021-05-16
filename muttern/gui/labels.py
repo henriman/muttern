@@ -1,3 +1,7 @@
+import tkinter as tk
+import numpy
+from PIL import Image, ImageTk
+
 class ImageLabel(tk.Label):
     """A label with an updatable image."""
 

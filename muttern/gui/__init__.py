@@ -2,11 +2,11 @@
 
 import tkinter as tk
 from PIL import Image, ImageTk
+import gui.labels
 import configparser
 from typing import Any
 import barcode_scanner
 import config as cfg
-import numpy
 
 class BarcodeScannerGUI(tk.Tk):
     """The barcode scanner GUI."""
@@ -41,7 +41,7 @@ class BarcodeScannerGUI(tk.Tk):
         self.name_text = tk.StringVar()
 
         # Create the widgets.
-        self.image = ImageLabel(self, bg="white")
+        self.image = labels.ImageLabel(self, bg="white")
         self.image.grid(rowspan=5)
 
         # Label which shows the scanned barcode.
