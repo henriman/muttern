@@ -1,16 +1,13 @@
-"""This module includes all GUI elements."""
-
 import tkinter as tk
-from PIL import Image, ImageTk
-import gui.labels
 import configparser
-from typing import Any
-import barcode_scanner
 import config as cfg
-import frames
+import barcode_scanner as bs
 
-class BarcodeScannerGUI(tk.Tk):
-    """The barcode scanner GUI."""
+# TODO: add docstrings
+# TODO: add type hints
+# TODO: add __slots__?
+
+class BarcodeScannerFrame(tk.Frame):
 
     configuration = configparser.ConfigParser()
     configuration.read("config.ini")
@@ -21,24 +18,11 @@ class BarcodeScannerGUI(tk.Tk):
 
     stream_delay = int(1000 / framerate)
 
-    def __init__(self, barcode_scanner: barcode_scanner.BarcodeScanner) -> None:
-        """Initialize the GUI."""
-
-        super().__init__()
+    def __init__(self, master, barcode_scanner: bs.BarcodeScanner):
+        super().__init__(master)
 
         self.barcode_scanner = barcode_scanner
 
-        # Configure the window.
-        self.title("muttern")
-        self.geometry(f"{self.screen_size[0]}x{self.screen_size[1]}")
-        self.configure(bg="white")
-        # TODO: translate to fullscreen
-        # root.attributes("-fullscreen", True)
-        self.bind("<Escape>", lambda _: self.destroy())
-
-        frames.BarcodeScannerFrame(self, barcode_scanner).pack()
-
-        """
         # Create string variables.
         self.barcode_text = tk.StringVar()
         self.brand_text = tk.StringVar()
@@ -114,7 +98,7 @@ class BarcodeScannerGUI(tk.Tk):
         self.dismiss_button.grid(row=4, column=1, sticky="NSEW")
 
     def stream(self) -> None:
-        \"""Update the GUI with the current frame; scan for barcodes and show product information.\"""
+        """Update the GUI with the current frame; scan for barcodes and show product information."""
 
         # Get the current frame and scan it for barcodes.
         products: Any  # TODO: actual type
@@ -135,4 +119,5 @@ class BarcodeScannerGUI(tk.Tk):
             self.barcode_text.set(product.barcode)
             self.brand_text.set(product.brands)
             self.name_text.set(product.name)
-"""
+
+
