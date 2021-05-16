@@ -2,6 +2,8 @@ import tkinter as tk
 import configparser
 import config as cfg
 import barcode_scanner as bs
+import gui.labels as labels
+from PIL import Image, ImageTk
 
 # TODO: add docstrings
 # TODO: add type hints
