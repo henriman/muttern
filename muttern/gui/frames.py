@@ -23,6 +23,9 @@ class BarcodeScannerFrame(tk.Frame):
     def __init__(self, master, barcode_scanner: bs.BarcodeScanner):
         super().__init__(master)
 
+        # Configure frame.
+        self.configure(bg="white")
+
         self.barcode_scanner = barcode_scanner
 
         # Create string variables.
