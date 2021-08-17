@@ -71,4 +71,17 @@ class OFFProduct(Product):
         else:
             return next(iter(keys))
 
+class UnknownProduct(Product):
+    "A product which could not be found in a database."
+
+    __slots__ = ("barcode", "data")
+
+    def __init__(self, barcode: str):
+        """Initialize the product with the only information we have: the barcode."""
+
+        super().__init__(barcode, dict())
+
+    def _get(self, key: str) -> str:
+        return str()
+
 P = TypeVar("P", bound=Product)

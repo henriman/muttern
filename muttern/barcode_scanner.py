@@ -6,7 +6,7 @@ import imutils.video as video
 from pyzbar import pyzbar
 import numpy
 import cv2
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 import product
 import config as cfg
 import database
@@ -39,7 +39,7 @@ class BarcodeScanner:
 
         return frame
 
-    def scan(self, frame: numpy.ndarray) -> List[Tuple[Tuple[int, int, int, int], product.P]]:
+    def scan(self, frame: numpy.ndarray) -> List[Tuple[Tuple[int, int, int, int], Optional[product.P]]]:
         """Scan for barcodes in the given frame; return their position and corresponding product."""
 
         # Find and decode the barcodes in the frame.
@@ -52,15 +52,13 @@ class BarcodeScanner:
             # Convert the barcode data into a string.
             barcode_data = barcode.data.decode("utf-8")
 
-            # Get the corresponding product from the database.
+            # Try to get the corresponding product from the database.
             product = self.dbh.get(barcode_data)
-            # TODO: What to do when product not found?
-            if product:
-                products.append((barcode.rect, product))
+            products.append((barcode.rect, product))
 
         return products
 
-    def get_and_scan_current_frame(self) -> Tuple[numpy.ndarray, List[product.P]]:
+    def get_and_scan_current_frame(self) -> Tuple[numpy.ndarray, List[Optional[product.P]]]:
         """Scan the current frame for barcodes; draw their outline and return the found products."""
 
         # Grab the current frame.

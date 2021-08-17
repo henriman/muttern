@@ -4,6 +4,7 @@ import config as cfg
 import barcode_scanner as bs
 import gui.labels as labels
 from PIL import Image, ImageTk
+import product as prdct
 
 # TODO: add docstrings
 # TODO: add type hints
@@ -80,7 +81,7 @@ class BarcodeScannerFrame(tk.Frame):
             width=152,
             height=120,
             image=self.confirm_image,
-            command=lambda: self.image.after(self.stream_delay, self.stream)
+            command=self.confirm
         )
         self.confirm_button.grid(row=3, column=1, sticky="NSEW")
 
@@ -102,6 +103,12 @@ class BarcodeScannerFrame(tk.Frame):
         )
         self.dismiss_button.grid(row=4, column=1, sticky="NSEW")
 
+    def confirm(self):
+        self.barcode_text.set("")
+        self.brand_text.set("")
+        self.name_text.set("")
+        self.image.after(self.stream_delay, self.stream)
+
     def stream(self) -> None:
         """Update the GUI with the current frame; scan for barcodes and show product information."""
 
@@ -122,7 +129,11 @@ class BarcodeScannerFrame(tk.Frame):
         # Show product information in GUI.
         for product in products:
             self.barcode_text.set(product.barcode)
-            self.brand_text.set(product.brands)
-            self.name_text.set(product.name)
+
+            if type(product) == prdct.OFFProduct:
+                self.brand_text.set(product.brands)
+                self.name_text.set(product.name)
+            else:
+                self.name_text.set("Product not found.")
 
 

@@ -88,4 +88,4 @@ class OFFDatabaseHandler(DatabaseHandler[product.OFFProduct]):
         data = response.json()
 
         # If the barcode was found in the database, return the corresponding product.
-        return product.OFFProduct(barcode, data["product"]) if data["status"] == 1 else None
+        return product.OFFProduct(barcode, data["product"]) if data["status"] == 1 else product.UnknownProduct(barcode)
