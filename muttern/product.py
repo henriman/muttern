@@ -43,8 +43,7 @@ class OFFProduct(Product):
         self.lc = self.config["localities"]["language_code"]
         self.name = self._get("product_name")
         self.brands = self._get("brands")
-
-        # TODO: add more information
+        # TODO: Add more product information
 
     def _get(self, key: str) -> str:
         """Return the information associated with the given key."""

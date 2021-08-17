@@ -7,9 +7,9 @@ from PIL import Image, ImageTk
 import product as prdct
 from typing import Any
 
-# TODO: add docstrings
-# TODO: add type hints
-# TODO: add __slots__?
+# TODO: Add type hints
+# TODO: Add docstrings
+# TODO: Add __slots__?
 
 class BarcodeScannerFrame(tk.Frame):
 

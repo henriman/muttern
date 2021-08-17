@@ -88,8 +88,8 @@ class BarcodeScanner:
         """Start the video stream and enter the context manager."""
 
         self.video_stream.start()
-        # TODO: let sleep asynchronously?
         time.sleep(2)  # Allow the camera sensor to warm up.
+        # TODO: sleep asynchronously?
 
         return self
 
