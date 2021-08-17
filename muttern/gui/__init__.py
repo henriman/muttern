@@ -13,12 +13,15 @@ import gui.frames
 class MainGUI(tk.Tk):
     """The barcode scanner GUI."""
 
-    def __init__(self, barcode_scanner: barcode_scanner.BarcodeScanner) -> None:
+    configuration = configparser.ConfigParser()
+    configuration.read("config.ini")
+
+    screen_size = cfg.str_to_tuple(configuration["hardware"]["screen_size"], int)
+
+    def __init__(self, barcode_scanner) -> None:
         """Initialize the GUI."""
 
         super().__init__()
-
-        self.barcode_scanner = barcode_scanner
 
         # Configure the window.
         self.title("muttern")
@@ -28,8 +31,6 @@ class MainGUI(tk.Tk):
         # root.attributes("-fullscreen", True)
         self.bind("<Escape>", lambda _: self.destroy())
 
-        with database.OFFDatabaseHandler(cache_location=None) as dbh:
-            with barcode_scanner.BarcodeScanner(dbh) as scanner:
-                bs_frame = frames.BarcodeScannerFrame(self, barcode_scanner)
-                bs_frame.pack()
-                bs_frame.stream()
+        bs_frame = frames.BarcodeScannerFrame(self, barcode_scanner)
+        bs_frame.pack()
+        bs_frame.stream()
