@@ -39,11 +39,38 @@ class OFFProduct(Product):
 
         super().__init__(barcode, data)
 
-        # Gather all necessary information.
+        # Gather product information.
         self.lc = self.config["localities"]["language_code"]
+
         self.name = self._get("product_name")
+        self.generic_name = self._get("generic_name")
+        self.quantity = self._get("quantity")
+        self.packaging_text = self._get("packaging_text")
+        self.packaging = self._get("packaging")
         self.brands = self._get("brands")
-        # TODO: Add more product information
+        self.categories = self._get("categories")
+        self.labels = self._get("labels")
+        self.manufacturing_places = self._get("manufacturing_places")
+        self.emb_codes = self._get("emb_codes")
+        self.link = self._get("link")
+        # self.expiration_date = self._get("expiration_date")
+        # Expiration date can be used to track product changes over time
+        # and to identify the most recent information.
+        # For our purposes, the date of the last edit is more relevant:
+        self.last_edit = self._get("last_edit_dates_tags")[0]
+        self.purchase_places = self._get("purchase_places")
+        self.stores = self._get("stores")
+        self.countries = self._get("countries")
+        self.ingredients_text = self._get("ingredients_text")
+        self.ingredients = self._get("ingredients")
+        self.allergens = self._get("allergens")
+        self.allergens_from_ingredients = self._get("allergens_from_ingredients")
+        self.traces = self._get("traces")
+        self.traces_from_ingredients = self._get("traces")
+        self.origins = self._get("origins")
+        self.serving_size = self._get("serving_size")
+        self.nutriments = self._get("nutriments")
+        # emissions?
 
     def _get(self, key: str) -> str:
         """Return the information associated with the given key."""
