@@ -8,7 +8,7 @@ import database
 from typing import Any
 import barcode_scanner
 import config as cfg
-import gui.frames
+import gui.frames as frames
 
 class MainGUI(tk.Tk):
     """The barcode scanner GUI."""

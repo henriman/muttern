@@ -5,6 +5,7 @@ import barcode_scanner as bs
 import gui.labels as labels
 from PIL import Image, ImageTk
 import product as prdct
+from typing import Any
 
 # TODO: add docstrings
 # TODO: add type hints
