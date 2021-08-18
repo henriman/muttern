@@ -73,7 +73,7 @@ class OFFProduct(Product):
         self.allergens = self._get("allergens")
         self.allergens_from_ingredients = self._get("allergens_from_ingredients")
         self.traces = self._get("traces")
-        self.traces_from_ingredients = self._get("traces")
+        self.traces_from_ingredients = self._get("traces_from_ingredients")
         self.origins = self._get("origins")
         self.serving_size = self._get("serving_size")
         self.nutriments = self._get("nutriments")
@@ -94,7 +94,7 @@ class OFFProduct(Product):
         return another one, trying the default first.
         """
 
-        # Find all keys with the `key`.
+        # Find all keys with the `key`; if the key is not in the data, return `None`.
         keys = [k for k in self.data.keys() if k.startswith(key)]
         if not keys:
             return None
@@ -104,12 +104,11 @@ class OFFProduct(Product):
 
         # FIXME: keys can also look like `labels_old`, `labels_hierarchy`; these should be ignored
         # Return the best fitting key.
-        if key_lc in keys and bool(self.data[key_lc]):
-            return key_lc
-        elif key in keys and bool(self.data[key]):
-            return key
-        else:
-            return sorted(keys, key=lambda k: bool(self.data[k]))[-1]
+        # Order: key with appropriate language code; key without language code; key with value
+        return sorted(
+            keys,
+            key=lambda k: 3 if k == key_lc else 2 if k == key else 1 if self.data[k] else 0
+        )[-1]
 
 class UnknownProduct(Product):
     "A product which could not be found in a database."
