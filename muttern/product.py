@@ -32,7 +32,14 @@ class Product(abc.ABC):
 class OFFProduct(Product):
     "A product from the Open Food Facts database."
 
-    __slots__ = ("barcode", "data", "lc", "name", "brands")
+    __slots__ = (
+        "barcode", "data", "lc", "name",
+        "generic_name", "quantity", "packaging_text", "packaging", "brands", "categories",
+        "labels", "manufacturing_places", "emb_codes", "link", "last_edit", "purchase_places",
+        "stores", "countries", "ingredients_text", "ingredients", "allergens",
+        "allergens", "allergens_from_ingredients", "traces", "traces_from_ingredients", "origins",
+        "serving_size", "nutriments"
+    )
 
     def __init__(self, barcode: str, data: Dict[str, Any]):
         """Initialize the product."""
@@ -75,7 +82,10 @@ class OFFProduct(Product):
     def _get(self, key: str) -> str:
         """Return the information associated with the given key."""
 
-        return self.data[self._get_key_with_lc(key)]
+        # Solution with walrus operator; Python 3.8+
+        # return self.data[(k := self._get_key_with_lc(key))] if k is not None else None
+        k = self._get_key_with_lc(key)
+        return self.data[k] if k is not None else None
 
     def _get_key_with_lc(self, key: str) -> str:
         """Get the key with the language code according to the config file.
@@ -85,17 +95,21 @@ class OFFProduct(Product):
         """
 
         # Find all keys with the `key`.
-        keys = [k for k in self.data.keys() if k.startswith(key) and bool(self.data[k])]
+        keys = [k for k in self.data.keys() if k.startswith(key)]
+        if not keys:
+            return None
+
         # Concatenate the key with the language code.
         key_lc = f"{key}_{self.lc}"
 
+        # FIXME: keys can also look like `labels_old`, `labels_hierarchy`; these should be ignored
         # Return the best fitting key.
-        if key_lc in keys:
+        if key_lc in keys and bool(self.data[key_lc]):
             return key_lc
-        elif key in keys:
+        elif key in keys and bool(self.data[key]):
             return key
         else:
-            return next(iter(keys))
+            return sorted(keys, key=lambda k: bool(self.data[k]))[-1]
 
 class UnknownProduct(Product):
     "A product which could not be found in a database."
