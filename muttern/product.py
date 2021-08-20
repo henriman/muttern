@@ -46,9 +46,9 @@ class OFFProduct(Product):
 
         super().__init__(barcode, data)
 
-        # Gather product information.
         self.lc = self.config["localities"]["language_code"]
 
+        # Gather product information.
         self.name = self._get("product_name")
         self.generic_name = self._get("generic_name")
         self.quantity = self._get("quantity")
@@ -60,10 +60,6 @@ class OFFProduct(Product):
         self.manufacturing_places = self._get("manufacturing_places")
         self.emb_codes = self._get("emb_codes")
         self.link = self._get("link")
-        # self.expiration_date = self._get("expiration_date")
-        # Expiration date can be used to track product changes over time
-        # and to identify the most recent information.
-        # For our purposes, the date of the last edit is more relevant:
         self.last_edit = self._get("last_edit_dates_tags")[0]
         self.purchase_places = self._get("purchase_places")
         self.stores = self._get("stores")
@@ -84,8 +80,8 @@ class OFFProduct(Product):
 
         # Solution with walrus operator; Python 3.8+
         # return self.data[(k := self._get_key_with_lc(key))] if k is not None else None
-        k = self._get_key_with_lc(key)
-        return self.data[k] if k is not None else None
+        key = self._get_key_with_lc(key)
+        return self.data[key] if key is not None else None
 
     def _get_key_with_lc(self, key: str) -> str:
         """Get the key with the language code according to the config file.
@@ -94,15 +90,17 @@ class OFFProduct(Product):
         return another one, trying the default first.
         """
 
+        # Keys to ignore.
+        ignore = [f"{key}_{suffix}" for suffix in ("hierarchy", "lc", "old", "tags")]
+
         # Find all keys with the `key`; if the key is not in the data, return `None`.
-        keys = [k for k in self.data.keys() if k.startswith(key)]
+        keys = [k for k in self.data.keys() if k.startswith(key) and k not in ignore]
         if not keys:
             return None
 
         # Concatenate the key with the language code.
         key_lc = f"{key}_{self.lc}"
 
-        # FIXME: keys can also look like `labels_old`, `labels_hierarchy`; these should be ignored
         # Return the best fitting key.
         # Order: key with appropriate language code; key without language code; key with value
         return sorted(
