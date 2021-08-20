@@ -5,8 +5,10 @@
 
 import abc
 import configparser
+from typing import Any, Dict, Tuple, TypeVar, Union
+
 import database
-from typing import Dict, Any, Tuple, Union, TypeVar
+
 
 class Product(abc.ABC):
     "A default interface for working with a product."
@@ -29,17 +31,23 @@ class Product(abc.ABC):
 
         pass
 
+
 class OFFProduct(Product):
     "A product from the Open Food Facts database."
 
-    __slots__ = (
-        "barcode", "data", "lc", "name",
-        "generic_name", "quantity", "packaging_text", "packaging", "brands", "categories",
-        "labels", "manufacturing_places", "emb_codes", "link", "last_edit", "purchase_places",
-        "stores", "countries", "ingredients_text", "ingredients", "allergens",
-        "allergens", "allergens_from_ingredients", "traces", "traces_from_ingredients", "origins",
-        "serving_size", "nutriments"
-    )
+    __slots__ = ("barcode", "data", "lc", "name", "generic_name", "quantity",
+                 "packaging_text", "packaging", "brands", "categories",
+                 "labels", "manufacturing_places", "emb_codes", "link",
+                 "last_edit", "purchase_places", "stores", "countries",
+                 "ingredients_text", "ingredients", "allergens", "allergens",
+                 "allergens_from_ingredients", "traces",
+                 "traces_from_ingredients", "origins", "serving_size",
+                 "nutriments")
+
+    # Key suffixes to ignore.
+    suffixes = ("hierarchy", "lc", "old", "tags", "analysis_tags",
+                "from_or_that_may_be_from_palm_oil_n", "from_palm_oil_n",
+                "from_palm_oil_tags", "n", "n_tags", "original_tags")
 
     def __init__(self, barcode: str, data: Dict[str, Any]):
         """Initialize the product."""
@@ -67,7 +75,8 @@ class OFFProduct(Product):
         self.ingredients_text = self._get("ingredients_text")
         self.ingredients = self._get("ingredients")
         self.allergens = self._get("allergens")
-        self.allergens_from_ingredients = self._get("allergens_from_ingredients")
+        self.allergens_from_ingredients = self._get(
+            "allergens_from_ingredients")
         self.traces = self._get("traces")
         self.traces_from_ingredients = self._get("traces_from_ingredients")
         self.origins = self._get("origins")
@@ -90,21 +99,14 @@ class OFFProduct(Product):
         return another one, trying the default first.
         """
 
-        # Keys to ignore.
-        suffixes = (
-            "hierarchy", "lc", "old", "tags", "analysis_tags",
-            "from_or_that_may_be_from_palm_oil_n", "from_palm_oil_n",
-            "from_palm_oil_tags", "n", "n_tags", "original_tags"
-        )
+        # Filter to-be-ignored suffixes if they are part of `key`.
         suffixes = list(
-            filter(lambda s: s not in key.split("_"), suffixes)
-        )
+            filter(lambda s: s not in key.split("_"), self.suffixes))
 
         # Find all keys with the `key`; if the key is not in the data, return `None`.
         keys = [
-            k for k in self.data.keys()
-            if k.startswith(key)
-            and not any(k.endswith(f"_{suffix}") for suffix in suffixes)
+            k for k in self.data.keys() if k.startswith(key) and not any(
+                k.endswith(f"_{suffix}") for suffix in suffixes)
         ]
         if not keys:
             return None
@@ -113,11 +115,12 @@ class OFFProduct(Product):
         key_lc = f"{key}_{self.lc}"
 
         # Return the best fitting key.
-        # Order: key with appropriate language code; key without language code; key with value
-        return sorted(
-            keys,
-            key=lambda k: 3 if k == key_lc else 2 if k == key else 1 if self.data[k] else 0
-        )[-1]
+        # Order by the relevance (key with most appropriate language code).
+        keys.sort(key=lambda k: 2 if k == key_lc else 1 if k == key else 0)
+        # However, keys with non-empty data entries should be preferred.
+        keys.sort(key=lambda k: bool(self.data[k]))
+        return keys[-1]
+
 
 class UnknownProduct(Product):
     "A product which could not be found in a database."
@@ -131,5 +134,6 @@ class UnknownProduct(Product):
 
     def _get(self, key: str) -> str:
         return str()
+
 
 P = TypeVar("P", bound=Product)
