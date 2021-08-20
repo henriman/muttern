@@ -91,10 +91,21 @@ class OFFProduct(Product):
         """
 
         # Keys to ignore.
-        ignore = [f"{key}_{suffix}" for suffix in ("hierarchy", "lc", "old", "tags")]
+        suffixes = (
+            "hierarchy", "lc", "old", "tags", "analysis_tags",
+            "from_or_that_may_be_from_palm_oil_n", "from_palm_oil_n",
+            "from_palm_oil_tags", "n", "n_tags", "original_tags"
+        )
+        suffixes = list(
+            filter(lambda s: s not in key.split("_"), suffixes)
+        )
 
         # Find all keys with the `key`; if the key is not in the data, return `None`.
-        keys = [k for k in self.data.keys() if k.startswith(key) and k not in ignore]
+        keys = [
+            k for k in self.data.keys()
+            if k.startswith(key)
+            and not any(k.endswith(f"_{suffix}") for suffix in suffixes)
+        ]
         if not keys:
             return None
 
