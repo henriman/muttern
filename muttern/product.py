@@ -5,7 +5,7 @@
 
 import abc
 import configparser
-from typing import Any, Dict, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 import database
 
@@ -26,7 +26,7 @@ class Product(abc.ABC):
         self.data = data
 
     @abc.abstractmethod
-    def _get(self, key: str) -> str:
+    def _get(self, key: str) -> Optional[Any]:
         """Return the information associated with the given key."""
 
         pass
@@ -68,7 +68,7 @@ class OFFProduct(Product):
         self.manufacturing_places = self._get("manufacturing_places")
         self.emb_codes = self._get("emb_codes")
         self.link = self._get("link")
-        self.last_edit = self._get("last_edit_dates_tags")[0]
+        self.last_edit = (self._get("last_edit_dates_tags") or [None])[0]
         self.purchase_places = self._get("purchase_places")
         self.stores = self._get("stores")
         self.countries = self._get("countries")
@@ -84,19 +84,18 @@ class OFFProduct(Product):
         self.nutriments = self._get("nutriments")
         # emissions?
 
-    def _get(self, key: str) -> str:
+    def _get(self, key: str) -> Optional[Any]:
         """Return the information associated with the given key."""
 
         # Solution with walrus operator; Python 3.8+
         # return self.data[(k := self._get_key_with_lc(key))] if k is not None else None
-        key = self._get_key_with_lc(key)
-        return self.data[key] if key is not None else None
+        best_key = self._get_best_key(key)
+        return self.data[best_key] if best_key is not None else None
 
-    def _get_key_with_lc(self, key: str) -> str:
-        """Get the key with the language code according to the config file.
+    def _get_best_key(self, key: str) -> Optional[str]:
+        """Get the best key.
 
-        If there is no key entry with that language code,
-        return another one, trying the default first.
+        This is a key with a non-empty data entry and the most appropriate language code.
         """
 
         # Filter to-be-ignored suffixes if they are part of `key`.
